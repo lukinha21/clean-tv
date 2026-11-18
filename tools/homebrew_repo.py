@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes docs/webos/apps.json, the repository the webOS Homebrew Channel reads (https://freemytv.io/webos/apps.json).
 
-    python3 tools/homebrew_repo.py FreeMyTV-webos.ipk
+    python3 tools/homebrew_repo.py CleanTV-webos.ipk
 
 Run it at release time, on the exact .ipk uploaded to the GitHub release (built with `webos/build.py --generic`), and
 commit what it writes with the release: the JSON and a copy of the .ipk in docs/webos/. The Channel downloads `ipkUrl`,

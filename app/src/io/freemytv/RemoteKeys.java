@@ -20,12 +20,12 @@ import android.view.KeyEvent;
  * On Xiaomi TVs whose remote has no Home button, its Mi button is BUTTON_4, a global key that Xiaomi's GlobalKeyReceiver
  * (partnercustomizer) turns into PatchWall. The filter sees it first, and by default it opens the home screen.
  * On Xiaomi TVs the YouTube button is ours too: BUTTON_3, a global key for the stock home screen (launcherx), which
- * Free My TV turns off. So is the PatchWall button (BUTTON_5, which that receiver would open PatchWall with); Netflix
+ * Clean TV turns off. So is the PatchWall button (BUTTON_5, which that receiver would open PatchWall with); Netflix
  * goes to the receiver, which stays on. Their remote sends one press as a burst of presses: the app opens once.
  * On Xiaomi TVs sold in Russia, the Okko, VK, Rutube, KION, Wink and IVI buttons are global keys too, for Xiaomi's
  * hot-key receiver (partnercustomizer's GlobalKeyReceiver).
  * On Hisense TVs, the Prime Video, YouTube, Disney+, All Apps, Settings (gear) and profile buttons go to Google TV's
- * home app, which Free My TV mode turns off: without the filter they do nothing. Netflix stays with the system.
+ * home app, which Clean TV mode turns off: without the filter they do nothing. Netflix stays with the system.
  * On Google TV Streamer, YouTube and the custom star button go to that home app too; Netflix goes to Google's service.
  * On onn streamers (Walmart; the 4K Pro, Amlogic, Google TV 14 tested), YouTube goes to Google TV's home app, which Free
  * My TV mode turns off, and so does Free TV; Netflix, Disney+ and Paramount+ go to the box's own receivers (droidlogic,
@@ -79,7 +79,7 @@ final class RemoteKeys {
     /**
      * Philips' Google TV models (TP Vision; 65OLED910, "Philips Google TV TA5", Android 14, #437), whose remote sends TP
      * Vision's own key codes. org.droidtv.GlobalKey hands the Settings button to Google TV's home app (its dashboard),
-     * which Free My TV turns off; Netflix, YouTube and Prime Video keep working through that receiver until an app is
+     * which Clean TV turns off; Netflix, YouTube and Prime Video keep working through that receiver until an app is
      * picked. Their older Android TV sets have another remote.
      */
     static final boolean PHILIPS_GTV = (is("Philips") || is("TPV") || Build.MODEL.startsWith("Philips"))

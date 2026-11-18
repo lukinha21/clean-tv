@@ -86,7 +86,11 @@ public class ModeJob extends JobService {
                 new ComponentName(c, ModeJob.class)).setExtras(extras);
         if (delayMs > 0) job.setMinimumLatency(delayMs);
         job.setOverrideDeadline(delayMs + 2_000);
-        scheduler.schedule(job.build());
+        try {
+            scheduler.schedule(job.build());
+        } catch (IllegalArgumentException | SecurityException e) {
+            AppLog.w("Could not schedule launcher job: " + action);
+        }
         return at;
     }
 

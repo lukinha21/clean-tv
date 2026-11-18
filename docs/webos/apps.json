@@ -10,7 +10,7 @@
   "packages": [
     {
       "id": "io.freemytv",
-      "title": "Free My TV",
+      "title": "Clean TV",
       "iconUri": "https://freemytv.io/assets/icon-512.png",
       "shortDescription": "A fast, ad-free home screen: your apps on a glass shelf, the weather and prices, day and night.",
       "pool": "main",
@@ -19,7 +19,7 @@
         "id": "io.freemytv",
         "version": "1.5.0",
         "type": "web",
-        "title": "Free My TV",
+        "title": "Clean TV",
         "appDescription": "A fast, ad-free home screen: your apps on a glass shelf, the weather and prices, day and night.",
         "iconUri": "https://freemytv.io/assets/icon-512.png",
         "sourceUrl": "https://github.com/simbasjungles/free-my-tv",

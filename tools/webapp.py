@@ -70,7 +70,7 @@ def read_config(path):
         'watchmodeKey': values.get('watchmode_key', '').strip(),
         'shelfApps': [s.strip() for s in values.get('shelf_apps', '').split(',') if s.strip()],
         'drawerFirst': values.get('drawer_first', 'false').lower() == 'true',
-        # Samsung: Home pressed in an app opened from here brings Free My TV back. It changes the package's manifest
+        # Samsung: Home pressed in an app opened from here brings Clean TV back. It changes the package's manifest
         # (tizen/build.py), so only a build that asks for it carries it; the release doesn't.
         'homeButton': values.get('samsung_home_button', 'false').lower() == 'true',
         'openPicksIn': 'nuvio' if values.get('open_picks_in', '').strip().lower() == 'nuvio' else 'apps',

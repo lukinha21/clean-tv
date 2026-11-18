@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Top 50 Brasil",
+    "uri": "spotify:playlist:37i9dQZEVXbMXbN3EUUhlg",
+    "image": "https://charts-images.scdn.co/assets/locale_en/regional/daily/region_br_default.jpg"
+  },
+  {
+    "title": "Top 50 Global",
+    "uri": "spotify:playlist:37i9dQZEVXbMDoHDwVN2tF",
+    "image": "https://charts-images.scdn.co/assets/locale_en/regional/daily/region_global_default.jpg"
+  },
+  {
+    "title": "Rock Classics",
+    "uri": "spotify:playlist:37i9dQZF1DWXRqgorJj26U",
+    "image": "https://i.scdn.co/image/ab67706f00000002694bf33281695f3b7542a09a"
+  },
+  {
+    "title": "RapCaviar",
+    "uri": "spotify:playlist:37i9dQZF1DX0XUsuxWHRQd",
+    "image": "https://i.scdn.co/image/ab67706f00000002ba757d984cae0ad4cfcbf1a8"
+  },
+  {
+    "title": "Thriller",
+    "uri": "spotify:album:2ANVost0y2y52ema1E9xAZ",
+    "image": "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e0232a7d87248d1b75463483df5"
+  },
+  {
+    "title": "Random Access Memories",
+    "uri": "spotify:album:4m2880jivSbbyEGAKfITCa",
+    "image": "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e029b9b36b0e22870b9f542d937"
+  },
+  {
+    "title": "IGOR",
+    "uri": "spotify:album:5zi7WsKlIiUXv09tbGLKsE",
+    "image": "https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e0230a635de2bb0caa4e26f6abb"
+  },
+  {
+    "title": "21",
+    "uri": "spotify:album:0S0KGZnfBGSIssfF54WSJh",
+    "image": "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e0250a3147b4edd7701a876c6ce"
+  }
+]

@@ -57,11 +57,11 @@ var TV = (function () {
     bridge.call(uri, JSON.stringify(params || {}));
   }
 
-  // LG's own screensaver asks every subscribed app first. While Free My TV is on screen and its own screensaver will
+  // LG's own screensaver asks every subscribed app first. While Clean TV is on screen and its own screensaver will
   // take over (`hold`, from home.js), it says no; otherwise, and in the background, the TV's runs as before.
   // Only where the TV lets the app subscribe: webOS 3.4 denies the call to Developer Mode apps (getPowerState too), so
   // there the one reply is that refusal, with no timestamp: nothing is held, and saverBridge stays set, so it isn't
-  // tried again. A 60UH6150 didn't start its own screensaver over Free My TV anyway (#478).
+  // tried again. A 60UH6150 didn't start its own screensaver over Clean TV anyway (#478).
   var saverBridge = null;
 
   function holdScreenSaver(hold) {
@@ -608,9 +608,9 @@ var TV = (function () {
 
   /*
    * Samsung's Home button always opens Smart Hub, and no app may take it (registerKey refuses it). With Home Settings >
-   * Home button > Free My TV, while an app opened from here is in front, the TV's own server on port 8001 is asked every
+   * Home button > Clean TV, while an app opened from here is in front, the TV's own server on port 8001 is asked every
    * 0.4 s whether it still shows it (GET /api/v2/applications/<id> answers {running, visible}); once it doesn't (Home,
-   * or the app closed), Free My TV comes to the front again. Home pressed in Free My TV itself still opens Smart Hub,
+   * or the app closed), Clean TV comes to the front again. Home pressed in Clean TV itself still opens Smart Hub,
    * and nothing is asked while no app opened from here is in front.
    */
   var back = {timer: null, ids: [], seen: false, away: false, asks: 0, waits: 0, gone: 0, asking: false, on: false};
@@ -655,7 +655,7 @@ var TV = (function () {
     next();
   }
 
-  /** Brings Free My TV to the front. As an app control (the manifest's reload="disable"), the page isn't loaded again. */
+  /** Brings Clean TV to the front. As an app control (the manifest's reload="disable"), the page isn't loaded again. */
   function comeBack() {
     function launch() { try { window.tizen.application.launch(self); } catch (e) {} }
     try {
@@ -709,7 +709,7 @@ var TV = (function () {
     /** Whether a pick of this service ("prime") can open on its title here: Watchmode is asked only then. */
     takesTitle: function (service) { return samsung && !!TITLE_LINKS[service]; },
 
-    /** Samsung: Home pressed in an app opened from here can bring Free My TV back (Home Settings > Home button). */
+    /** Samsung: Home pressed in an app opened from here can bring Clean TV back (Home Settings > Home button). */
     canReturnHome: canReturn,
     returnHome: function (on) { back.on = canReturn && !!on; if (!back.on) stopWatch(); },
 

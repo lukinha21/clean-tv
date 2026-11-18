@@ -44,9 +44,9 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Free My TV's settings (the app's icon, "All Apps", or the gear on the home screen), in the style of Apple TV's
+ * Clean TV's settings (the app's icon, "All Apps", or the gear on the home screen), in the style of Apple TV's
  * settings: the big symbol and title on the left, the list on the right with the focused row in white. "Home screen"
- * opens the Free My TV / Original choice (with a check on the current one); the switch runs in the main process
+ * opens the Clean TV / Original choice (with a check on the current one); the switch runs in the main process
  * (HomeMode) and this screen only asks for it and follows the state file.
  */
 public class SettingsActivity extends Activity {
@@ -205,6 +205,7 @@ public class SettingsActivity extends Activity {
         private List<String[]> watchApps;
         private int watchScan, watchHiddenCount;
         private final RectF tmp = new RectF(), rowRect = new RectF(), focusBox = new RectF();
+        private final android.graphics.drawable.Drawable brandIcon = getContext().getDrawable(R.drawable.icon);
         private JSONObject state = new JSONObject(), recs = new JSONObject();
         private boolean hasKey;
         private int screen = MAIN, focus;
@@ -291,7 +292,7 @@ public class SettingsActivity extends Activity {
             phone = HomeMode.phone(a);
             scene.applyPalette();
             setFocusable(true);
-            setContentDescription("Free My TV");
+            setContentDescription("Clean TV");
             installed = Updates.installedVersion(a);
             // TalkBack: one item per row, id = row + 1.
             spoken = new Spoken(this, new Spoken.Source() {
@@ -328,7 +329,7 @@ public class SettingsActivity extends Activity {
                     if (row == 0) {
                         String busyText = busyText();
                         String value = busy() ? (busyText.isEmpty() ? Ui.tr("Starting…") : busyText)
-                                : freeActive() ? "Free My TV" : Ui.tr("Original");
+                                : freeActive() ? "Clean TV" : Ui.tr("Original");
                         return Ui.trf("Home Screen, {mode}", "mode", value);
                     }
                     String[] names = {Ui.tr("Screensaver, preview"), Ui.tr("Home Settings"),
@@ -337,7 +338,7 @@ public class SettingsActivity extends Activity {
                     return row - 1 < names.length ? names[row - 1] : "";
                 }
                 case HOME_CHOICE: {
-                    String name = row == 0 ? "Free My TV, " + (Capabilities.screensaver(getContext())
+                    String name = row == 0 ? "Clean TV, " + (Capabilities.screensaver(getContext())
                             ? Ui.tr("no ads, with the new screensaver") : Ui.tr("no ads"))
                             : "Original, " + Ui.tr("the TV's factory home screen");
                     boolean inUse = (row == 0) == freeActive();
@@ -457,7 +458,6 @@ public class SettingsActivity extends Activity {
             h = height;
             k = w / 1920f;
             scene.setSize(w, h);
-            Symbols.warm(getContext(), "sparkles", 150 * k);
             Symbols.warm(getContext(), "chevron_right", 22 * k);
             Symbols.warm(getContext(), "check", 26 * k);
             title = Ui.text(Ui.displaySemibold, 50 * k, 0xFFFFFFFF);
@@ -505,7 +505,8 @@ public class SettingsActivity extends Activity {
         }
 
         private boolean freeActive() {
-            return HomeMode.FREE.equals(state.optString("mode")) && !state.optBoolean("homeReverted");
+            return HomeMode.isDefaultHome(getContext())
+                    || HomeMode.FREE.equals(state.optString("mode")) && !state.optBoolean("homeReverted");
         }
 
         /** Memory is measured two minutes after a switch: until then its cells say it's coming. */
@@ -533,10 +534,10 @@ public class SettingsActivity extends Activity {
          */
         private static String stalledText() {
             return RemoteKeys.TCL
-                    ? Ui.trf("TCL blocks Free My TV from running in the background, so nothing changed. From a computer, "
+                    ? Ui.trf("TCL blocks Clean TV from running in the background, so nothing changed. From a computer, "
                             + "run this, then try again: {command}", "command",
                             "adb shell \"appops set io.freemytv AUTO_START allow || appops set io.freemytv APP_AUTO_START allow\"")
-                    : Ui.tr("The TV didn't let Free My TV run in the background, so nothing changed. Try again in a minute.");
+                    : Ui.tr("The TV didn't let Clean TV run in the background, so nothing changed. Try again in a minute.");
         }
 
         private int rowCount() {
@@ -581,8 +582,13 @@ public class SettingsActivity extends Activity {
 
             // On the left: big symbol, title, description.
             float cx = 500 * k;
-            Symbols.draw(getContext(), c, "sparkles", cx, 400 * k, 150 * k, 0xEBFFFFFF);
-            c.drawText("Free My TV", cx, 612 * k, title);
+            if (brandIcon != null) {
+                float half = 103 * k;
+                brandIcon.setBounds(Math.round(cx - half), Math.round(400 * k - half),
+                        Math.round(cx + half), Math.round(400 * k + half));
+                brandIcon.draw(c);
+            }
+            c.drawText("Clean TV", cx, 612 * k, title);
             c.drawText(Ui.tr("Your TV's home screen and screensaver"), cx, 660 * k, subtitle);
             c.drawText(versionName(getContext()), cx, 704 * k, version);
 
@@ -596,7 +602,7 @@ public class SettingsActivity extends Activity {
         private void drawMain(Canvas c, float seconds) {
             boolean working = busy();
             String busyText = busyText();
-            String mode = freeActive() ? "Free My TV" : Ui.tr("Original");
+            String mode = freeActive() ? "Clean TV" : Ui.tr("Original");
             String[] labels = {Ui.tr("Home Screen"), Ui.tr("Screensaver"),
                     Ui.tr("Home Settings"), Ui.tr("Shelf"), Ui.tr("Top Buttons"), Ui.tr("Inputs"),
                     Ui.tr("Remote Buttons"), Ui.tr("Sleep Timer"), Ui.tr("TV Settings")};
@@ -713,7 +719,7 @@ public class SettingsActivity extends Activity {
             }
             cellValue.setColor(0x73FFFFFF);
             c.drawText(Ui.tr("Original"), colA, y, cellValue);
-            c.drawText("Free My TV", colB, y, cellValue);
+            c.drawText("Clean TV", colB, y, cellValue);
             cellValue.setColor(0xD9FFFFFF);
             // The mode just switched to: its memory comes two minutes later, so its cells wait with "…", not "—".
             boolean soon = !busy() && memorySoon();
@@ -745,12 +751,12 @@ public class SettingsActivity extends Activity {
             if (shown == 0) c.drawText(Ui.tr("None yet."), x, y + 42 * k, notice);
         }
 
-        /** Home screen choice: Free My TV or the original, with a check on the one in use. */
+        /** Home screen choice: Clean TV or the original, with a check on the one in use. */
         private void drawChoice(Canvas c) {
             Paint heading = Ui.text(Ui.displaySemibold, 34 * k, 0xFFFFFFFF);
             c.drawText(Ui.tr("Home Screen"), LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
             String free = Capabilities.screensaver(getContext()) ? Ui.tr("No ads, with the new screensaver") : Ui.tr("No ads");
-            String[][] options = {{"Free My TV", free},
+            String[][] options = {{"Clean TV", free},
                     {Ui.tr("Original"), Ui.tr("The TV's factory home screen")}};
             int current = freeActive() ? 0 : 1;
             for (int i = 0; i < 2; i++) {
@@ -796,9 +802,9 @@ public class SettingsActivity extends Activity {
 
         private static String versionName(Context c) {
             try {
-                return "Free My TV " + c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName;
+                return "Clean TV " + c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName;
             } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-                return "Free My TV";
+                return "Clean TV";
             }
         }
 
@@ -1412,7 +1418,7 @@ public class SettingsActivity extends Activity {
             // can onn's buttons.
             if (RemoteKeys.XIAOMI || RemoteKeys.XIAOMI_AFKR0 || RemoteKeys.ONN) {
                 appPkgs.add(HomeMode.PKG);
-                appLabels.add("Free My TV");
+                appLabels.add("Clean TV");
             }
             if (RemoteKeys.HISENSE || RemoteKeys.GOOGLE_STREAMER || RemoteKeys.ONN || RemoteKeys.PHILIPS_GTV) {
                 appPkgs.add(Prefs.ALL_APPS);
@@ -1426,7 +1432,7 @@ public class SettingsActivity extends Activity {
 
         /** Changes the focused row's value one step (OK and → go forward, ← goes back). */
         private void adjust(int dir) {
-            // Refused or without Free My TV mode, Now Playing can still be turned off (and the refusal is then forgotten).
+            // Refused or without Clean TV mode, Now Playing can still be turned off (and the refusal is then forgotten).
             boolean turnOff = screen == HOME_SETTINGS && pickScroll + focus == PLAYING_ROW && Prefs.nowPlaying();
             if (unavailable(focus) != null && !turnOff) return;
             if (screen == PICKS) {
@@ -2473,7 +2479,7 @@ public class SettingsActivity extends Activity {
                         : RemoteKeys.supported() ? Ui.tr("Disney and Globoplay: the TV itself controls those buttons.")
                         : Ui.tr("TCL remote buttons: on this TV they work as always."), LIST_X * k + 30 * k, hy + 38 * k, hint);
                 // No key service on this TV (RemoteKeys.FILTER_SAFE): inside other apps the buttons do nothing.
-                if (!RemoteKeys.FILTER_SAFE) c.drawText(Ui.tr("On this TV they work on Free My TV's home screen only."),
+                if (!RemoteKeys.FILTER_SAFE) c.drawText(Ui.tr("On this TV they work on Clean TV's home screen only."),
                         LIST_X * k + 30 * k, hy + 76 * k, hint);
             }
         }
@@ -2604,7 +2610,7 @@ public class SettingsActivity extends Activity {
                 screen = POWER;
                 focus = 0;
             } else {
-                // As the drawer's TV Settings: where nothing answers the standard request (an HY300 Pro+ in Free My TV
+                // As the drawer's TV Settings: where nothing answers the standard request (an HY300 Pro+ in Clean TV
                 // mode, #379), Android TV's own settings, and never a crash.
                 HomeApps.open(activity, HomeApps.tvSettings(), null);
             }

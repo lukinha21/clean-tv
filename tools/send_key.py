@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sends a secret key to Free My TV on the TV, so it never goes into the APK (any app on the TV can read an installed
+"""Sends a secret key to Clean TV on the TV, so it never goes into the APK (any app on the TV can read an installed
 APK) or into config.properties.
 
     python3 tools/send_key.py 192.168.1.50 immich_api_key     # asks for the key (not shown)
@@ -204,7 +204,7 @@ def main():
         print('No TV connected: give its IP address first (adb devices lists the connected ones).')
         return 1
     if 'package:io.freemytv' not in listed.stdout.split():
-        print('Free My TV is not installed on this TV.')
+        print('Clean TV is not installed on this TV.')
         return 1
     sdk = adb('shell', 'getprop', 'ro.build.version.sdk', text=True).stdout.strip()
     if sdk.isdigit() and int(sdk) < 28:
@@ -212,7 +212,7 @@ def main():
         return 1
     before = received(name)
     if before is None:
-        print('The Free My TV on this TV is too old to take keys: install the new FreeMyTV.apk (see Install), then '
+        print('The Clean TV on this TV is too old to take keys: install the new FreeMyTV.apk (see Install), then '
               'send it again.')
         return 1
 
@@ -243,7 +243,7 @@ def main():
     if not after or after == before:
         print(f'The TV didn\'t take {name}: it keeps one line of 8 or more printable characters. Nothing changed.')
         return 1
-    print(f'Sent {name}. Free My TV uses it from the next time the home screen or its settings open.')
+    print(f'Sent {name}. Clean TV uses it from the next time the home screen or its settings open.')
     return 0
 
 

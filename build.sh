@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds FreeMyTV.apk without Gradle: aapt2 -> javac -> d8 -> zipalign -> apksigner.
+# Builds CleanTV.apk without Gradle: aapt2 -> javac -> d8 -> zipalign -> apksigner.
 # Needs a JDK (17+) and the Android SDK command-line tools (build-tools 34+, platform android-34). See README.md.
 #   ./build.sh             with config.properties (your city, your TMDB key)
 #   ./build.sh --generic   without it, as the APK on GitHub's releases: no key, and the TV's time zone gives the city
@@ -165,7 +165,7 @@ mkdir -p out/res/xml
 "$BT/aapt2" compile --dir out/res -o out/res-gen.zip
 # Fonts uncompressed: Android reads them straight from the APK.
 "$BT/aapt2" link -o out/base.apk -I "$AJ" --manifest app/AndroidManifest.xml --java out/gen out/res.zip out/res-gen.zip \
-  --min-sdk-version 26 --target-sdk-version 33 -A app/assets -0 ttf
+  --rename-manifest-package io.freemytv.preview --min-sdk-version 26 --target-sdk-version 33 -A app/assets -0 ttf
 # Windows aapt2 packs assets with backslash separators ("assets/symbols\x.png") and Android
 # cannot find them: the home screen loses its icons and fonts. Rename the zip entries to "/".
 case "$(uname -s 2>/dev/null)" in
@@ -232,12 +232,12 @@ else "${JAVA_HOME:+$JAVA_HOME/bin/}jar" -u -M -f out/base.apk -C out classes.dex
 if [ -n "${FREEMYTV_KEYSTORE:-}" ]; then
   [ -n "${FREEMYTV_KEYSTORE_PASS:-}" ] || { echo "FREEMYTV_KEYSTORE_PASS is empty"; exit 1; }
   apksigner sign --ks "$FREEMYTV_KEYSTORE" --ks-pass env:FREEMYTV_KEYSTORE_PASS --key-pass env:FREEMYTV_KEYSTORE_PASS \
-    --out FreeMyTV.apk out/aligned.apk
+    --out CleanTV.apk out/aligned.apk
 else
   if [ ! -f freemytv.keystore ]; then
     "$KEYTOOL" -genkeypair -keystore freemytv.keystore -alias freemytv -keyalg RSA -keysize 2048 -validity 20000 \
-      -storepass freemytv -keypass freemytv -dname "CN=Free My TV" >/dev/null 2>&1
+      -storepass freemytv -keypass freemytv -dname "CN=Clean TV" >/dev/null 2>&1
   fi
-  apksigner sign --ks freemytv.keystore --ks-pass pass:freemytv --key-pass pass:freemytv --out FreeMyTV.apk out/aligned.apk
+  apksigner sign --ks freemytv.keystore --ks-pass pass:freemytv --key-pass pass:freemytv --out CleanTV.apk out/aligned.apk
 fi
-echo "Built FreeMyTV.apk ($(du -h FreeMyTV.apk | cut -f1)). Install: adb install -r FreeMyTV.apk"
+echo "Built CleanTV.apk ($(du -h CleanTV.apk | cut -f1)). Install: adb install -r CleanTV.apk"

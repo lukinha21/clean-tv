@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Installs Free My TV on an LG TV in Developer Mode, over your Wi-Fi.
+"""Installs Clean TV on an LG TV in Developer Mode, over your Wi-Fi.
 
     python3 webos/install.py 192.168.1.50              # install or update, then open it
     python3 webos/install.py 192.168.1.50 --uninstall  # remove it
@@ -28,7 +28,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'webos'))
 import build  # noqa: E402  (reads and changes the package's appinfo.json)
 
-IPK = os.path.join(ROOT, 'FreeMyTV-webos.ipk')
+IPK = os.path.join(ROOT, 'CleanTV-webos.ipk')
 with open(os.path.join(ROOT, 'webos', 'appinfo.json'), encoding='utf-8') as f:
     APP_ID = json.load(f)['id']
 TEMP = '/media/developer/temp/freemytv.ipk'
@@ -159,7 +159,7 @@ def main():
     ssh(ip, key, 'rm -f ' + TEMP)
     luna(ip, key, 'luna://com.webos.applicationManager/launch', {'id': APP_ID})
     print('Installed and open on the TV.')
-    print('Tip: while Free My TV is open, hold a number key on the remote to open it with that key from anywhere.')
+    print('Tip: while Clean TV is open, hold a number key on the remote to open it with that key from anywhere.')
     print('Developer Mode lasts about 40 days: open the Developer Mode app now and then and press EXTEND.')
 
 

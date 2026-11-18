@@ -13,7 +13,7 @@ import android.view.KeyEvent;
 import android.widget.TextView;
 
 /**
- * The Free My TV home screen (Android's "Home" role in Free My TV mode). It runs in the :home process: if it crashes,
+ * The Clean TV home screen (Android's "Home" role in Clean TV mode). It runs in the :home process: if it crashes,
  * the safety net in the main process keeps working. On the 3rd crash within 5 min, the Watchdog gives the home screen
  * back to the TV's original one.
  */
@@ -40,7 +40,7 @@ public class HomeActivity extends Activity {
             // Don't try to draw again: only show a notice while the main process restores the original home screen.
             HomeMode.requestRevertHome(this);
             TextView t = new TextView(this);
-            t.setText(Ui.tr("Free My TV's home screen ran into a problem.\nGoing back to the TV's original home screen…"));
+            t.setText(Ui.tr("Clean TV's home screen ran into a problem.\nGoing back to the TV's original home screen…"));
             t.setTextColor(Color.WHITE);
             t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
             t.setGravity(Gravity.CENTER);
@@ -54,7 +54,7 @@ public class HomeActivity extends Activity {
         getWindow().setBackgroundDrawable(null);
         if (wantsAllApps(getIntent())) home.showAllApps();
         else if (getIntent().getBooleanExtra(EXTRA_INPUTS, false)) home.showInputs();
-        // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Free My TV mode.
+        // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Clean TV mode.
         if (HomeMode.noteHomeShown(this) && SystemClock.elapsedRealtime() < 240_000 && "live".equals(Prefs.powerOn())) {
             org.json.JSONObject s = HomeMode.state(this);
             liveWaits = HomeMode.FREE.equals(s.optString("mode")) && !s.optBoolean("homeReverted");

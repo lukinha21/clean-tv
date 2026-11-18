@@ -2,11 +2,13 @@
 import math
 import os
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT = os.path.join(ROOT, "app/assets/fonts/InterVariable.ttf")
-STOPS = [(0.0, (255, 194, 122)), (0.5, (255, 122, 158)), (1.0, (154, 140, 255))]   # sunrise -> pink -> dusk
+STOPS = [(0.0, (8, 20, 35)), (0.5, (12, 45, 60)), (1.0, (19, 72, 76))]
+MINT = (140, 255, 214, 255)
+ICE = (231, 255, 249, 255)
 
 
 def gradient(w, h, angle=35):
@@ -30,18 +32,8 @@ def gradient(w, h, angle=35):
     return img
 
 
-def sparkle(draw, cx, cy, r, fill):
-    """Four-point star."""
-    pts = []
-    for i in range(8):
-        ang = math.pi / 2 * (i // 2) + (0 if i % 2 == 0 else math.pi / 4)
-        rad = r if i % 2 == 0 else r * 0.26
-        pts.append((cx + rad * math.cos(ang - math.pi / 2), cy + rad * math.sin(ang - math.pi / 2)))
-    draw.polygon(pts, fill=fill)
-
-
 def mark(size, bg=True):
-    """The mark: a TV with a sparkle, on the gradient squircle (bg) or alone (white)."""
+    """A mint play glyph framed by two open corners."""
     s = size * 4
     img = gradient(s, s).convert("RGBA") if bg else Image.new("RGBA", (s, s), (0, 0, 0, 0))
     if bg:
@@ -50,20 +42,15 @@ def mark(size, bg=True):
         img.putalpha(mask)
     layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    white = (255, 255, 255, 255)
-    # screen
-    x0, y0, x1, y1 = s * 0.2, s * 0.27, s * 0.8, s * 0.66
-    d.rounded_rectangle((x0, y0, x1, y1), radius=int(s * 0.07), outline=white, width=int(s * 0.055))
-    # stand
-    d.rounded_rectangle((s * 0.36, s * 0.715, s * 0.64, s * 0.765), radius=int(s * 0.025), fill=white)
-    # sparkle inside the screen
-    sparkle(d, s * 0.5, s * 0.465, s * 0.12, white)
-    sparkle(d, s * 0.655, s * 0.355, s * 0.045, white)
-    if bg:
-        shadow = layer.copy().filter(ImageFilter.GaussianBlur(s * 0.02))
-        tint = Image.new("RGBA", (s, s), (120, 40, 80, 0))
-        tint.putalpha(shadow.getchannel("A").point(lambda v: int(v * 0.22)))
-        img.alpha_composite(tint, (0, int(s * 0.012)))
+    stroke = round(s * 0.066)
+    for points in [((0.20, 0.52), (0.20, 0.29), (0.48, 0.29)),
+                   ((0.80, 0.48), (0.80, 0.71), (0.52, 0.71))]:
+        coordinates = [(round(x * s), round(y * s)) for x, y in points]
+        d.line(coordinates, fill=ICE, width=stroke, joint="curve")
+        for x, y in coordinates:
+            r = stroke / 2
+            d.ellipse((x - r, y - r, x + r, y + r), fill=ICE)
+    d.polygon([(s * 0.43, s * 0.37), (s * 0.43, s * 0.63), (s * 0.65, s * 0.50)], fill=MINT)
     img.alpha_composite(layer)
     return img.resize((size, size), Image.LANCZOS)
 
@@ -88,7 +75,7 @@ def banner(w=640, h=360):
     m = mark(int(h * 0.5 * s), bg=False)
     d = ImageDraw.Draw(img)
     f = font(int(h * 0.15 * s), 650)
-    text = "Free My TV"
+    text = "Clean TV"
     box = d.textbbox((0, 0), text, font=f)
     gap = int(w * 0.02 * s)
     total = m.width + gap + (box[2] - box[0])
@@ -109,4 +96,11 @@ if __name__ == "__main__":
     mark(512).save(os.path.join(site, "icon-512.png"))
     mark(180).save(os.path.join(site, "apple-touch-icon.png"))
     mark(64).save(os.path.join(site, "favicon-64.png"))
+    banner(1200, 630).convert("RGB").save(os.path.join(site, "og.jpg"), quality=92)
+    mark(512).save(os.path.join(ROOT, "tizen", "icon.png"))
+    mark(80).save(os.path.join(ROOT, "webos", "icon.png"))
+    mark(130).save(os.path.join(ROOT, "webos", "largeIcon.png"))
+    symbol = Image.new("RGBA", (160, 160), "white")
+    symbol.putalpha(mark(160, bg=False).getchannel("A"))
+    symbol.save(os.path.join(ROOT, "app/assets/symbols", "clean_tv.png"))
     print("ok")

@@ -17,3 +17,11 @@ __pycache__/
 # macOS
 .DS_Store
 tools/.i18n-cache.json
+# Build e mídia local do fork
+out-preview/
+app/assets/home-wallpaper.png
+*.local.json
+*.p12
+*.jks
+.env
+.env.*

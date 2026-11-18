@@ -1,5 +1,5 @@
 name: An idea
-description: Something you'd like Free My TV to do.
+description: Something you'd like Clean TV to do.
 body:
   - type: textarea
     id: idea

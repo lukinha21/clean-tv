@@ -1,5 +1,7 @@
 package io.freemytv;
 
+import android.content.Intent;
+
 import android.app.UiModeManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Original ⇄ Free My TV. "free": our home screen and screensaver, and the apps in the lists below turned off
+ * Original ⇄ Clean TV. "free": our home screen and screensaver, and the apps in the lists below turned off
  * (pm disable-user: still installed, back with one button). "original": everything as it came from the factory.
  *
  * It all goes through the TV's own ADB (Adb, 127.0.0.1:5555), which you allow once on the TV. The switches run as
@@ -36,9 +38,9 @@ import java.util.regex.Pattern;
 final class HomeMode {
     private HomeMode() {}
 
-    static final String PKG = "io.freemytv";
-    static final String HOME_ACTIVITY = PKG + "/" + PKG + ".HomeActivity";
-    static final String SETTINGS_ACTIVITY = PKG + "/" + PKG + ".SettingsActivity";
+    static final String PKG = App.applicationId;
+    static final String HOME_ACTIVITY = new android.content.ComponentName(PKG, HomeActivity.class.getName()).flattenToShortString();
+    static final String SETTINGS_ACTIVITY = new android.content.ComponentName(PKG, SettingsActivity.class.getName()).flattenToShortString();
     /** Our screensaver: on Android 11 to 12L the copy that runs in the main process (ScreensaverAlone, #10). */
     private static final boolean DREAM_ALONE = Build.VERSION.SDK_INT >= 30 && Build.VERSION.SDK_INT <= 32;
     static final String DREAM = PKG + "/" + PKG + (DREAM_ALONE ? ".ScreensaverAlone" : ".Screensaver");
@@ -48,12 +50,12 @@ final class HomeMode {
 
     /**
      * Fire TV (Fire OS): Amazon's launcher keeps the Home button (`priority=950` on `CATEGORY_HOME`), so the switch
-     * refuses Free My TV mode while Original and the watchdog still run.
+     * refuses Clean TV mode while Original and the watchdog still run.
      */
     static final boolean AMAZON = "Amazon".equalsIgnoreCase(Build.MANUFACTURER) || "Amazon".equalsIgnoreCase(Build.BRAND);
 
     /**
-     * Where switching the home screen kept a TV from starting again, so the switch refuses Free My TV mode and a TV
+     * Where switching the home screen kept a TV from starting again, so the switch refuses Clean TV mode and a TV
      * already in it goes back to Original. Kalley 43G200 turns Google TV's setup app back on at every start: without its
      * home screen the next start looped at the logo, and that TV only came back with a USB reflash (CleanYourTV,
      * examples/kalley-43g200). A Huawei TV (HarmonyOS) stopped at its logo at the first restart after the switch, and
@@ -86,7 +88,7 @@ final class HomeMode {
 
     /** What the settings and the refused switch say on a phone. */
     static String phoneText() {
-        return Ui.tr("Free My TV is a TV app: install this APK on your Android TV or Google TV (freemytv.io), not on a phone.");
+        return Ui.tr("Clean TV is a TV app: install this APK on your Android TV or Google TV (freemytv.io), not on a phone.");
     }
 
     /** Classic Android TV's home screen; its recommendations service crashes on the screensaver while it's off (#11). */
@@ -108,7 +110,7 @@ final class HomeMode {
     static final String HTC_HOME = "com.htc.htclauncherhighenglishd08";
 
     /**
-     * Turned off in Free My TV mode, when the TV has them. Google extras first, then TV-maker extras (TCL here; add
+     * Turned off in Clean TV mode, when the TV has them. Google extras first, then TV-maker extras (TCL here; add
      * your brand's, see the README). The TV's own home screen and screensaver are added at switch time.
      */
     static final String[] DEBLOAT = {
@@ -308,7 +310,7 @@ final class HomeMode {
 
     /** Asks the main process to switch (the settings screen calls this); the stamp tells when it started (ModeJob.started). */
     static long request(Context c, String mode) {
-        // Back to Free My TV before Original's revoke ran: it would stop the app mid-switch, and isn't wanted any more.
+        // Back to Clean TV before Original's revoke ran: it would stop the app mid-switch, and isn't wanted any more.
         if (FREE.equals(mode)) ModeJob.cancel(c, ModeJob.REVOKE_WATCH);
         return ModeJob.schedule(c, ModeJob.APPLY, mode, 0);
     }
@@ -318,7 +320,7 @@ final class HomeMode {
         ModeJob.schedule(c, ModeJob.REVERT, null, 0);
     }
 
-    /** After the TV boots (and after a TV update): wait for the system to settle and check Free My TV mode. */
+    /** After the TV boots (and after a TV update): wait for the system to settle and check Clean TV mode. */
     static void bootCheck(Context c) {
         if (AMAZON) return;
         ensureRemoteService(c, 30_000);
@@ -423,7 +425,7 @@ final class HomeMode {
         }
     }
 
-    /** After an update of this app: complete Free My TV mode if anything is missing. */
+    /** After an update of this app: complete Clean TV mode if anything is missing. */
     static void verify(Context c) {
         ModeJob.schedule(c, ModeJob.VERIFY, null, 0);
     }
@@ -431,7 +433,7 @@ final class HomeMode {
     /**
      * The remote's app buttons (RemoteKeys) need an accessibility service that only filters those keys. It is on only
      * on TCL, Vestel, KTC, Sony, Xiaomi and Hisense TVs, the JVC G24, Formovie projectors, Chromecast with Google TV
-     * (Sabrina, YouTube only) and the Google TV Streamer in Free My TV mode; Original turns it off. Android turns it
+     * (Sabrina, YouTube only) and the Google TV Streamer in Clean TV mode; Original turns it off. Android turns it
      * off when this app is updated, so the boot check and an update turn it back on. Changing Remote Buttons asks
      * again. It goes off with every button on Nothing (or the brand's default), and on TCL's Android 11
      * (RemoteKeys.serviceWanted).
@@ -441,7 +443,7 @@ final class HomeMode {
     }
 
     static void ensureRemoteServiceNow(Context app) {
-        if (!RemoteKeys.supported() || !FREE.equals(state(app).optString("mode"))) return;
+        if (!RemoteKeys.supported() || !(FREE.equals(state(app).optString("mode")) || isDefaultHome(app))) return;
         try (Adb adb = Adb.connect(app, 10_000, null)) {
             remoteService(app, adb, RemoteKeys.serviceWanted());
         } catch (IOException e) {
@@ -449,7 +451,14 @@ final class HomeMode {
         }
     }
 
-    private static final String REMOTE_SERVICE = PKG + "/" + PKG + ".RemoteKeyService";
+    static boolean isDefaultHome(Context context) {
+        Intent home = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        android.content.pm.ResolveInfo resolved = context.getPackageManager().resolveActivity(home,
+                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+        return resolved != null && resolved.activityInfo != null && PKG.equals(resolved.activityInfo.packageName);
+    }
+
+    private static final String REMOTE_SERVICE = new android.content.ComponentName(PKG, RemoteKeyService.class.getName()).flattenToShortString();
     private static final Pattern SERVICE = Pattern.compile("[\\w.]+/[\\w.$]+");
 
     /** Adds ours to the enabled accessibility services (keeping the others, like TalkBack), or takes it out. */
@@ -486,7 +495,7 @@ final class HomeMode {
 
     /**
      * Home Settings' Now Playing widget reads what apps play through our notification listener, which could read every
-     * notification (ours never does): it's allowed only while the widget is on, in Free My TV mode, and taken back when
+     * notification (ours never does): it's allowed only while the widget is on, in Clean TV mode, and taken back when
      * the widget goes off, by Original and by the watchdog's revert. Asked when the widget changes and by a screen that
      * finds it on but not allowed; this process sets it to what the widget says at that moment, so the order the
      * requests run in doesn't matter.
@@ -540,7 +549,7 @@ final class HomeMode {
     private static void applyFree(Context c) {
         JSONObject s = state(c);
         if (AMAZON) {
-            done(c, Ui.tr("On Fire TV the Home button belongs to Amazon's home screen. Free My TV stays an app here: open it from your apps."));
+            done(c, Ui.tr("On Fire TV the Home button belongs to Amazon's home screen. Clean TV stays an app here: open it from your apps."));
             return;
         }
         if (BRICKS) {
@@ -621,7 +630,7 @@ final class HomeMode {
             Set<String> disabled = new HashSet<>(stringList(state(c), "disabled"));
             Set<String> present = packages(adb, "");
             Set<String> keptOff = new HashSet<>(stringList(state(c), "keptOff"));
-            // Off now and not on our list: the person turned it off, unless an earlier install of Free My TV did (its
+            // Off now and not on our list: the person turned it off, unless an earlier install of Clean TV did (its
             // list lives in the TV's settings too, since an uninstall erases our state file).
             Set<String> ours = recorded(adb);
             Set<String> offNow = packages(adb, "-d");
@@ -680,20 +689,20 @@ final class HomeMode {
             }
             wakeWatch(adb, true);
             notice(c, Capabilities.screensaver(c)
-                    ? Ui.trf("Free My TV is on: new home screen and screensaver, {n} apps turned off.", "n", disabled.size())
-                    : Ui.trf("Free My TV is on: new home screen, {n} apps turned off.", "n", disabled.size()));
-            busy(c, Ui.tr("Measuring Free My TV…"));
+                    ? Ui.trf("Clean TV is on: new home screen and screensaver, {n} apps turned off.", "n", disabled.size())
+                    : Ui.trf("Clean TV is on: new home screen, {n} apps turned off.", "n", disabled.size()));
+            busy(c, Ui.tr("Measuring Clean TV…"));
             measure(c, adb, FREE, false);
             done(c, null);
             homeAfter(adb);
             ModeJob.schedule(c, ModeJob.MEMORY, FREE, 120_000);
         } catch (Exception e) {
-            done(c, Ui.trf("Couldn't turn on Free My TV: {error}", "error", e.getMessage()));
+            done(c, Ui.trf("Couldn't turn on Clean TV: {error}", "error", e.getMessage()));
         }
     }
 
     static String bricksText() {
-        return Ui.tr("On this TV model, switching the home screen kept a TV from starting. Free My TV stays an app here: open it from your apps.");
+        return Ui.tr("On this TV model, switching the home screen kept a TV from starting. Clean TV stays an app here: open it from your apps.");
     }
 
     private static void applyOriginal(Context c) {
@@ -891,7 +900,7 @@ final class HomeMode {
                 }
                 s.put("homeReverted", true).put("disabled", kept);
                 save(app, s);
-                notice(app, Ui.tr("Free My TV's home screen crashed 3 times in a row; I switched back to the original one."));
+                notice(app, Ui.tr("Clean TV's home screen crashed 3 times in a row; I switched back to the original one."));
                 adb.shell("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
             } catch (Exception e) {
                 AppLog.w("could not give the home screen back: " + e.getMessage());
@@ -900,7 +909,7 @@ final class HomeMode {
     }
 
     /**
-     * In Free My TV mode, checks that everything is still as we left it (the listed apps off, our home screen and
+     * In Clean TV mode, checks that everything is still as we left it (the listed apps off, our home screen and
      * screensaver) and completes whatever is missing, with a notice. Runs after the TV boots (TV updates can turn
      * things back on) and after an update of this app.
      */
@@ -917,7 +926,7 @@ final class HomeMode {
             if (!FREE.equals(s.optString("mode")) || AMAZON) return;
             if (BRICKS) {
                 // Switched by a version that still allowed it here: the TV's own home screen back before the next restart.
-                AppLog.w("Free My TV mode where the switch kept a TV from starting: back to Original");
+                AppLog.w("Clean TV mode where the switch kept a TV from starting: back to Original");
                 applyOriginal(app);
                 notice(app, bricksText());
                 return;
@@ -970,7 +979,7 @@ final class HomeMode {
                     order.remove(dreamPkg);
                     if (disabledNow.remove(dreamPkg)) adb.shell("pm enable " + dreamPkg);
                 }
-                // Off before Free My TV: turned off again if a TV update brings one back, but never handed to
+                // Off before Clean TV: turned off again if a TV update brings one back, but never handed to
                 // Original to turn on.
                 List<String> keptOff = stringList(s, "keptOff");
                 // Switched before Google TV's home was a target beside another launcher: off now and not by us, the
@@ -1058,14 +1067,14 @@ final class HomeMode {
                 if (theirs) latest.put("keptOff", new JSONArray(keptOff));
                 save(app, latest);
             } catch (Exception e) {
-                notice(app, Ui.trf("Couldn't check Free My TV: {error}", "error", e.getMessage()));
+                notice(app, Ui.trf("Couldn't check Clean TV: {error}", "error", e.getMessage()));
                 return;
             }
             if (!fixed.isEmpty()) {
                 notice(app, updated ? Ui.trf("The TV update turned back on {list}.", "list", String.join(", ", fixed))
                         : Ui.trf("Turned off what was missing: {list}.", "list", String.join(", ", fixed)));
             } else if (updated) {
-                notice(app, Ui.tr("The TV was updated; Free My TV is still on."));
+                notice(app, Ui.tr("The TV was updated; Clean TV is still on."));
             }
         }
     }
@@ -1205,7 +1214,7 @@ final class HomeMode {
     /**
      * Original takes the permission back. Android stops the app's processes when a permission is revoked, so this runs
      * as its own job once the switch is over (if the job is run again after that, it finds nothing left to revoke). It
-     * holds the switch lock, so a switch never runs under it, and does nothing if Free My TV is back by then.
+     * holds the switch lock, so a switch never runs under it, and does nothing if Clean TV is back by then.
      */
     static void revokeWatchNow(Context app) {
         synchronized (RUN) {
@@ -1323,7 +1332,7 @@ final class HomeMode {
 
     /** A failed measurement only logs: the switch itself went through (or is about to), and a TV may cut it short
      *  (a TCL's TGuard kills the job once the original launcher is in front, and the error read as a failed switch, #277).
-     *  The memory after the timing (the home screen just in front, as Free My TV's is when it's measured), but on its
+     *  The memory after the timing (the home screen just in front, as Clean TV's is when it's measured), but on its
      *  own: a timing that fails no longer leaves both memory rows empty. */
     private static void measure(Context c, Adb adb, String mode, boolean memory) {
         try {
@@ -1507,7 +1516,7 @@ final class HomeMode {
     }
 
     /**
-     * What Free My TV turned off, kept in the TV's own settings too: an uninstall or Clear data erases our state file,
+     * What Clean TV turned off, kept in the TV's own settings too: an uninstall or Clear data erases our state file,
      * and a new install must still tell its own work from what the person had turned off (#142).
      */
     private static final String RECORD = "free_my_tv_disabled";

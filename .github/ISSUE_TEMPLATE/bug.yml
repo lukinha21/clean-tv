@@ -24,7 +24,7 @@ body:
         LG and Samsung: Home Settings → About this TV shows it.
         Google TV / Android TV: the TV's Settings → System → About, or `adb shell getprop ro.product.model`.
         Fire TV: Settings → My Fire TV → About.
-        If Free My TV didn't install: the label on the back of the TV.
+        If Clean TV didn't install: the label on the back of the TV.
       placeholder: Samsung UE55TU7020
     validations:
       required: true
@@ -36,10 +36,10 @@ body:
   - type: input
     id: version
     attributes:
-      label: Free My TV version
+      label: Clean TV version
       description: |
         LG and Samsung: the last line of Home Settings → About this TV.
-        Google TV / Android TV / Fire TV: on the Free My TV settings screen, on the left under the name.
+        Google TV / Android TV / Fire TV: on the Clean TV settings screen, on the left under the name.
       placeholder: "1.5"
   - type: textarea
     id: what

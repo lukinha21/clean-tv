@@ -34,7 +34,7 @@ there; patch that class too. **Important:** the CLI classpath globs `lib-ncli/`,
 Verify a freshly built package before installing:
 
 ```bash
-unzip -p FreeMyTV-tizen.wgt author-signature.xml | grep -oE 'sha[0-9]+' | sort -u   # want sha256
+unzip -p CleanTV-tizen.wgt author-signature.xml | grep -oE 'sha[0-9]+' | sort -u   # want sha256
 ```
 
 ## Cause 2 — use a Tizen certificate, not a Samsung certificate
@@ -57,7 +57,7 @@ Samsung‑signed one did not — the difference is the newer HAWKM_FHD set *also
 
 ## `config.xml` notes for Tizen 2.4
 
-Free My TV's own [`config.xml`](config.xml) installed as it is on a KU6640 and a KU6400 (#349), with a space in its
+Clean TV's own [`config.xml`](config.xml) installed as it is on a KU6640 and a KU6400 (#349), with a space in its
 `<name>` and `tv-samsung` as its profile, so change these only if the install fails in under a second. Three manifest
 details also caused a **sub‑second** `install failed[118]` on a UA40K5300 (distinct from the ~4 s signature failure
 above):
@@ -73,7 +73,7 @@ above):
 
 ```bash
 sdb connect <TV_IP>:26101
-tizen install -n FreeMyTV-tizen.wgt -t "$(sdb devices | awk '/device\t/{print $NF}')"   # e.g. -t UA40K5300
+tizen install -n CleanTV-tizen.wgt -t "$(sdb devices | awk '/device\t/{print $NF}')"   # e.g. -t UA40K5300
 ```
 
 Arbitrary `sdb shell` is blocked (`closed`) on these sets; a few commands are whitelisted, e.g.

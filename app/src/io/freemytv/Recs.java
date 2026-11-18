@@ -362,6 +362,10 @@ final class Recs {
 
     /** This hour's Prefs.cards(), movies only ("movie") or shows only ("tv"); null = both (the home screen tabs). */
     List<Pick> now(String kind) {
+        return now(kind, Prefs.cards());
+    }
+
+    List<Pick> now(String kind, int cards) {
         List<Pick> out = new ArrayList<>();
         if (!hasKey(context)) return out;    // no TMDB key: no recommendations
         List<Pick> progress = new ArrayList<>(), liked = new ArrayList<>(), list = new ArrayList<>();
@@ -377,7 +381,6 @@ final class Recs {
         // Trakt first: what they're in the middle of (as Trakt orders it), up to 2 in 5 cards, then their watchlist and
         // Trakt's recommendations, up to 3 in 5 with those; then TMDB's. A new set each hour; Trakt's fill the rest when
         // TMDB's run short. Never two from the same franchise ("Law & Order" and "Law & Order: Special…").
-        int cards = Prefs.cards();
         java.util.Set<String> seen = new java.util.HashSet<>();
         take(out, seen, progress, 0, Math.max(1, cards * 2 / 5));
         take(out, seen, liked, hour * cards, Math.max(2, cards * 3 / 5));
@@ -1431,6 +1434,39 @@ final class Recs {
         synchronized (images) {
             return p == null || p.backdrop == null ? null : posters.get(p.backdrop);
         }
+    }
+
+    private final android.util.LruCache<String, Poster> catalogPosters = new android.util.LruCache<>(16);
+    private final java.util.Set<String> catalogPending = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+    private final android.util.LruCache<String, Boolean> unavailablePosters = new android.util.LruCache<>(32);
+
+    Poster catalogPoster(Pick pick) {
+        if (pick.poster == null || pick.poster.isEmpty()) return null;
+        Poster existing = poster(pick);
+        if (existing != null) return existing;
+        String key = pick.poster;
+        Poster cached = catalogPosters.get(key);
+        if (cached != null || unavailablePosters.get(key) != null || !catalogPending.add(key)) return cached;
+        io.execute(() -> {
+            try {
+                File file = posterFile(pick);
+                if (!file.exists()) {
+                    HttpURLConnection connection = pick.id < 0
+                            ? plexOpen("/photo/:/transcode?width=500&height=750&minSize=1&url=" + URLEncoder.encode(key, "UTF-8"))
+                            : (HttpURLConnection) new URL(POSTERS + key).openConnection();
+                    fetchFile(file, connection);
+                }
+                Poster art = loadPoster(pick);
+                if (art == null) unavailablePosters.put(key, true);
+                else catalogPosters.put(key, art);
+            } catch (IOException | RuntimeException | OutOfMemoryError e) {
+                unavailablePosters.put(key, true);
+            } finally {
+                catalogPending.remove(key);
+                notifyListeners();
+            }
+        });
+        return null;
     }
 
     void trim() {

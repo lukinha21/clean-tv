@@ -120,7 +120,7 @@ var Prefs = (function () {
       var a = pick('inputsHidden', null);
       return a instanceof Array ? a : (this.liveInput() ? [] : ['live']);
     },
-    /** Samsung: Home pressed in an app opened from here brings Free My TV back (a build with samsung_home_button, until
+    /** Samsung: Home pressed in an app opened from here brings Clean TV back (a build with samsung_home_button, until
      * turned off on the TV; otherwise Smart Hub's Home). */
     homeReturns: function () { return pick('homeReturns', CONFIG.homeButton === true) === true; },
     /** Home Settings > Clock: '24' or '12', or 'auto' for the language's own; config.properties' clock_format until

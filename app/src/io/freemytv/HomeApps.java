@@ -74,6 +74,9 @@ final class HomeApps {
         String symbol;      // icon for the shortcuts and special cards
         Bitmap tile;        // 16:9 card (apps and specials): set with setTile
         BitmapShader tileShader;   // the card's, for its rounded corners (made with the card, never while drawing)
+        Bitmap squareArt;
+        BitmapShader squareShader;
+        int tileEdgeColor = 0xFF202132;
         Bitmap logo;        // colored logo with no background (shelf); null = use the card
         Bitmap logoDark;    // version for a light background (YouTube's white icon), if any
         float logoInk;      // fraction of the logo with ink (thin logos are drawn larger, with the same "weight")
@@ -84,6 +87,14 @@ final class HomeApps {
         void setTile(Bitmap b) {
             tile = b;
             tileShader = b == null ? null : new BitmapShader(b, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            if (b != null && b.getConfig() != Bitmap.Config.HARDWARE) {
+                int first = b.getPixel(b.getWidth() / 2, 0);
+                int last = b.getPixel(b.getWidth() / 2, b.getHeight() - 1);
+                tileEdgeColor = android.graphics.Color.rgb(
+                        (android.graphics.Color.red(first) + android.graphics.Color.red(last)) / 2,
+                        (android.graphics.Color.green(first) + android.graphics.Color.green(last)) / 2,
+                        (android.graphics.Color.blue(first) + android.graphics.Color.blue(last)) / 2);
+            }
         }
     }
 
@@ -368,7 +379,7 @@ final class HomeApps {
         return shortcut(kind, key, label, symbol);
     }
 
-    /** Free My TV settings, in the corner of the home screen. */
+    /** Clean TV settings, in the corner of the home screen. */
     /** The TV's own settings (android.settings.SETTINGS; where nothing answers it, Android TV's settings app). */
     static Item tvSettings() {
         return shortcut(ANDROID_SETTINGS, "tv-settings", Ui.tr("TV Settings"), "tv_settings");
@@ -647,7 +658,7 @@ final class HomeApps {
         synchronized (HomeApps.class) {
             TILES.keySet().removeIf(k -> k.contains(".") && !seen.contains(k));
         }
-        items.add(special(c, SETTINGS, "freemytv-settings", "Free My TV", "sparkles"));
+        items.add(special(c, SETTINGS, "freemytv-settings", "Clean TV", "clean_tv"));
         return items;
     }
 
@@ -693,7 +704,7 @@ final class HomeApps {
             case ANDROID_SETTINGS:
                 intent = new Intent(Settings.ACTION_SETTINGS);
                 // Where nothing answers it, Android TV's own settings by name: on the HY300 Pro+ the stock home
-                // (com.htc.magcubicos) is the one that does, and Free My TV mode turns it off (#379).
+                // (com.htc.magcubicos) is the one that does, and Clean TV mode turns it off (#379).
                 plain = new Intent().setComponent(new ComponentName("com.android.tv.settings", "com.android.tv.settings.MainSettings"));
                 break;
             case DEVICE:
@@ -1210,6 +1221,41 @@ final class HomeApps {
         tile.setHasMipMap(true);
         TILES.put(cacheKey, tile);
         return tile;
+    }
+
+    private static final android.util.LruCache<String, Bitmap> SQUARE_ART = new android.util.LruCache<>(48);
+
+    static void prepareSquareArt(Context context, List<Item> items) {
+        if (items == null) return;
+        PackageManager manager = context.getPackageManager();
+        for (Item item : items) {
+            if (item.kind != APP || item.pkg == null || item.logo != null) continue;
+            Bitmap square = SQUARE_ART.get(item.pkg);
+            if (square == null) {
+                try {
+                    Drawable icon = manager.getApplicationIcon(item.pkg);
+                    if (manager.isDefaultApplicationIcon(icon)) continue;
+                    int size = 192;
+                    square = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(square);
+                    if (icon instanceof AdaptiveIconDrawable) {
+                        icon.setBounds(0, 0, size, size);
+                    } else {
+                        int width = Math.max(1, icon.getIntrinsicWidth()), height = Math.max(1, icon.getIntrinsicHeight());
+                        float scale = size * 0.88f / Math.max(width, height);
+                        int x = Math.round((size - width * scale) / 2), y = Math.round((size - height * scale) / 2);
+                        icon.setBounds(x, y, size - x, size - y);
+                    }
+                    icon.draw(canvas);
+                    square.setHasMipMap(true);
+                    SQUARE_ART.put(item.pkg, square);
+                } catch (PackageManager.NameNotFoundException | RuntimeException ignored) {
+                    continue;
+                }
+            }
+            item.squareArt = square;
+            item.squareShader = new BitmapShader(square, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        }
     }
 
     /** The app's official TV art (the Android TV banner), at the highest density the app has. */

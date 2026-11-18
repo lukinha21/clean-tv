@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Settings changed on the TV itself (Free My TV > Settings). config.properties only gives the first
+ * Settings changed on the TV itself (Clean TV > Settings). config.properties only gives the first
  * values; anything the user changes here wins. Read from the :home process (home screen, screensaver, settings).
  */
 final class Prefs {
@@ -447,7 +447,7 @@ final class Prefs {
         put("shelf", sb.toString());
     }
 
-    /** The shelf puts the app last opened from Free My TV first (Recent) instead of keeping the order set in Settings > Shelf. */
+    /** The shelf puts the app last opened from Clean TV first (Recent) instead of keeping the order set in Settings > Shelf. */
     static boolean shelfRecent() { return sp().getBoolean("shelfRecent", false); }
     static void setShelfRecent(boolean on) { put("shelfRecent", on); }
 

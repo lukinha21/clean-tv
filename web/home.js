@@ -952,7 +952,7 @@
       step: function (d) { cycle('boxInput', ['live', 'hdmi1', 'hdmi2', 'hdmi3', 'hdmi4'], Prefs.boxInput(), d); renderTop(); }});
     rows.push({label: tr('Inputs'), value: '›', inputs: true, step: function (d) { if (d >= 0) openInputsEdit(); }});
     if (TV.canReturnHome) {
-      rows.push({label: tr('Home button'), value: Prefs.homeReturns() ? 'Free My TV' : tr('home|TV home screen'),
+      rows.push({label: tr('Home button'), value: Prefs.homeReturns() ? 'Clean TV' : tr('home|TV home screen'),
         step: function () { Prefs.set('homeReturns', !Prefs.homeReturns()); TV.returnHome(Prefs.homeReturns()); }});
     }
     rows.push({label: tr('Shelf'), value: '›', shelf: true, step: function (d) { if (d >= 0) openShelfEdit(); }});
@@ -1306,7 +1306,7 @@
     var list = el('div', 'list', box), holder = el('div', 'rows', list);
     var rows = [
       [tr('Model'), info && info.model], [tr('Firmware'), info && info.firmware], [tr('System'), info && info.system],
-      [tr('IP address'), info && info.ip], [tr('Time zone'), TV.zone()], ['Free My TV', info && info.version]
+      [tr('IP address'), info && info.ip], [tr('Time zone'), TV.zone()], ['Clean TV', info && info.version]
     ];
     for (var i = 0; i < rows.length; i++) {
       var row = el('div', 'row', holder), label = el('span', '', row, rows[i][0]);
