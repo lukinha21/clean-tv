@@ -6,7 +6,35 @@
 
 Clean TV é um fork do [Free My TV](https://github.com/simbasjungles/free-my-tv) que reorganiza a experiência no Android TV em uma barra lateral e telas dedicadas. Ele reúne aplicativos, recomendações, entradas da TV e música numa interface feita para o controle remoto.
 
-[Instalação](#instalação) · [Configurar TMDB](#configurar-tmdb) · [Seu próprio wallpaper](#seu-próprio-wallpaper) · [Spotify opcional](#spotify-opcional) · [Controles](#controles) · [Compatibilidade](#compatibilidade) · [Créditos](#créditos)
+[Veja em ação](#veja-em-ação) · [Instalação](#instalação) · [Configurar TMDB](#configurar-tmdb) · [Seu próprio wallpaper](#seu-próprio-wallpaper) · [Spotify opcional](#spotify-opcional) · [Controles](#controles) · [Compatibilidade](#compatibilidade) · [Créditos](#créditos)
+
+## Veja em ação
+
+![Tela inicial do Clean TV com recomendações do TMDB, duas fileiras de apps, clima, entradas e o widget de desempenho](docs/media/inicio.webp)
+
+Capturas do **Clean TV 1.0** em uma TCL com Android TV 11, usando o fundo padrão e o TMDB configurado. Títulos, capas, aplicativos, canais e entradas podem variar conforme a TV.
+
+### Navegação e animações
+
+![Gravação da TV mostrando o foco animado nos aplicativos e a troca de seção pela barra lateral](docs/media/navegacao.gif)
+
+Use as setas para mover o foco entre os cartões. Na barra lateral, subir ou descer já troca a seção. Pressione **Direita** para entrar no conteúdo e **OK** para abrir o item.
+
+### Telas disponíveis
+
+| Apps | Filmes e Séries |
+| --- | --- |
+| [![Grade de aplicativos instalados](docs/media/apps.webp)](docs/media/apps.webp) | [![Catálogo com pôsteres do TMDB](docs/media/filmes-series.webp)](docs/media/filmes-series.webp) |
+| Apps instalados com ícones quadrados. | Catálogo do TMDB com filmes e séries em duas fileiras. |
+
+| TV ao Vivo | Música |
+| --- | --- |
+| [![Atalhos do sintonizador e das entradas HDMI](docs/media/tv-ao-vivo.webp)](docs/media/tv-ao-vivo.webp) | [![Seleção pública do Spotify com capas](docs/media/musica.webp)](docs/media/musica.webp) |
+| Sintonizador e entradas disponíveis na TV testada. | Álbuns e playlists públicas sem precisar conectar uma conta. |
+
+[![Tela de configurações do Clean TV](docs/media/configuracoes.webp)](docs/media/configuracoes.webp)
+
+Em **Configurações**, você pode ajustar o início, os favoritos, os botões do topo, as entradas e o controle.
 
 ## O que muda no Clean TV
 
@@ -91,6 +119,10 @@ O PNG é incluído no APK que você gerar. Para trocar a imagem, substitua o arq
 **Música** já oferece uma seleção pública de álbuns e playlists, incluindo Top 50 Brasil e Top 50 Global. As capas são carregadas quando aparecem na tela. Ao selecionar um item, o launcher tenta abri-lo no Spotify da TV.
 
 Para exibir **suas** faixas de maior afinidade, álbuns salvos e playlists, abra **Música → Conectar Spotify**. Informe o **Client ID** de um app autorizado no Spotify for Developers e conclua a autorização no navegador da própria TV. O app deve registrar `http://127.0.0.1:8765/spotify/callback` como Redirect URI.
+
+[![Diálogo Conectar Spotify com o campo Client ID vazio](docs/media/spotify-conectar.webp)](docs/spotify-android-tv.md)
+
+Essa é a tela real de conexão, antes do login. O [guia ilustrado do Spotify](docs/spotify-android-tv.md) mostra o caminho da seleção pública até a autorização da conta.
 
 Cada instalação autoriza sua própria conta. A integração usa OAuth com PKCE e dispensa Client Secret. O dono de um app em modo de desenvolvimento precisa ter Premium e adicionar as contas autorizadas no painel do Spotify. Consulte o [guia da integração](docs/spotify-android-tv.md) e as [regras do Spotify](https://developer.spotify.com/documentation/web-api/concepts/quota-modes).
 
